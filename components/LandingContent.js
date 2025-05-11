@@ -2,7 +2,6 @@ import { useRef, useContext } from 'react';
 import { Box, Typography, Button, Container, Grid } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Link from 'next/link';
-import { ThemeContext } from '../context/ThemeContext';
 
 const HeroSection = styled(Box)(({ theme }) => ({
   backgroundImage: 'url(/hero.jpg)',
@@ -33,7 +32,6 @@ const Section = styled(Box)(({ theme }) => ({
 
 export default function LandingContent() {
   const bookingRef = useRef(null);
-  const themeContext = useContext(ThemeContext); // Placeholder for useContext
 
   const scrollToBooking = () => {
     bookingRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -5,7 +5,6 @@ import { Box, Button, TextField, Typography, Card, CardContent } from '@mui/mate
 import { styled } from '@mui/material/styles';
 import '@fontsource/orbitron/700.css';
 
-// Styled components for futuristic design
 const AuthCard = styled(Card)(({ theme }) => ({
   maxWidth: 400,
   margin: 'auto',
