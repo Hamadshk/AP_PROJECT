@@ -30,14 +30,13 @@ export default function SignIn() {
             }}>
                 <h1 className="">Sign In</h1>
                 {error && <p className="">{error}</p>}
-                <div className="mb-4">
+                <div>
                     <label htmlFor="email">Email</label>
                     <input
                         type="email"
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border p-2 rounded"
                         required
                     />
                 </div>
@@ -48,7 +47,6 @@ export default function SignIn() {
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full border p-2 rounded"
                         required
                     />
                 </div>

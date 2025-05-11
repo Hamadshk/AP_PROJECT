@@ -8,7 +8,7 @@ export default function Header() {
     { name: 'Booking', href: '/booking' },
     { name: 'Products', href: '/products' },
     { name: 'Contact', href: '/contact' },
-    { name: 'Admin Login', href: '/admin/login' },
+    { name: 'Dashboard', href: '/admin/dashboard' },
   ];
 
   return (

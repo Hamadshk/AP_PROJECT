@@ -4,28 +4,10 @@ import { useEffect } from 'react';
 import { Box, Container, Typography, Button } from '@mui/material';
 import Header from '@/components/Header';
 import Link from 'next/link';
+import { RemoveCircleOutlineRounded } from '@mui/icons-material';
 
 export default function AdminDashboard() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/admin/login');
-    }
-  }, [status, router]);
-
-  if (status === 'loading') {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#1a1b41' }}>
-        <Typography variant="h6" color="white">Loading...</Typography>
-      </Box>
-    );
-  }
-
-  if (!session || session.user.role !== 'admin') {
-    return null; // Redirect handled by useEffect
-  }
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#1a1b41' }}>
@@ -59,10 +41,11 @@ export default function AdminDashboard() {
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
+  console.log(session);
   if (!session || session.user.role !== 'admin') {
     return {
       redirect: {
-        destination: '/admin/login',
+        destination: '/signIn',
         permanent: false,
       },
     };

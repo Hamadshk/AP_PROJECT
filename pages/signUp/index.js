@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-
+import { signIn } from 'next-auth/react';
 export default function SignUp() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -24,7 +24,17 @@ export default function SignUp() {
         if (!res.ok) {
             setError(data.message);
         } else {
-            router.push('/');
+            const result = await signIn('credentials', {
+                redirect: false,
+                email,
+                password,
+            });
+
+            if (result.error) {
+                setError(result.error);
+            } else {
+                router.push('/');
+            }
         }
     };
 
