@@ -1,18 +1,17 @@
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI; // Store in .env.local
+const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      const { date, slot, userId } = req.body; // userId optional, if authenticated
+      const { date, slot, userId } = req.body;
 
       await client.connect();
       const database = client.db('moviehouse');
       const bookings = database.collection('bookings');
 
-      // Check for existing booking
       const existingBooking = await bookings.findOne({ date, slot });
       if (existingBooking) {
         return res.status(400).json({ error: 'Slot already booked' });
@@ -22,7 +21,7 @@ export default async function handler(req, res) {
       const booking = {
         date,
         slot,
-        userId: userId || 'anonymous', // Handle unauthenticated users
+        userId: userId || 'anonymous',
         createdAt: new Date(),
       };
       await bookings.insertOne(booking);

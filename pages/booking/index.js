@@ -7,7 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { format } from 'date-fns';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-
+import { useSession, getSession } from "next-auth/react";
 // Import futuristic font
 import '@fontsource/orbitron/700.css';
 
@@ -114,7 +114,6 @@ const SlotButton = styled(Button)(({ theme, selected }) => ({
   },
 }));
 
-// Styled component for confirm button
 const ConfirmButton = styled(Button)(({ theme }) => ({
   fontFamily: '"Orbitron", sans-serif',
   background: 'linear-gradient(45deg, #ff4081, #007bff)',
@@ -141,8 +140,8 @@ export default function BookingPage() {
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { data: session } = useSession();
 
-  // Fetch available slots when date changes
   useEffect(() => {
     async function fetchSlots() {
       setLoading(true);
@@ -189,7 +188,7 @@ export default function BookingPage() {
         body: JSON.stringify({
           date: formattedDate,
           slot: selectedSlot,
-          userId: 'anonymous',
+          userId: session.user.id
         }),
       });
 
@@ -304,4 +303,18 @@ export default function BookingPage() {
       <Footer sx={{ zIndex: 2, backgroundColor: '#1a1b41' }} />
     </LocalizationProvider>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+  console.log(session);
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/signIn',
+        permanent: false,
+      },
+    };
+  }
+  return { props: {} };
 }

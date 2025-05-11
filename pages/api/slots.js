@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       const database = client.db('moviehouse');
       const bookings = database.collection('bookings');
 
-      const { date } = req.query; // e.g., "2025-05-10"
+      const { date } = req.query;
       const bookedSlots = await bookings
         .find({ date })
         .project({ slot: 1, _id: 0 })
