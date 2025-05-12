@@ -1,6 +1,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { signIn } from 'next-auth/react';
+import {
+    Container,
+    Box,
+    TextField,
+    Button,
+    Typography,
+    Link as MuiLink,
+    Paper,
+} from '@mui/material';
+import NextLink from 'next/link';
+
 export default function SignUp() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -39,46 +50,99 @@ export default function SignUp() {
     };
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <form onSubmit={handleSubmit} style={{
-                width: '300px', padding: '20px', border: '1px solid #ccc', borderRadius: '5px', display: 'flex', flexDirection: 'column', gap: '10px'
-            }}>
-                <h1 className="text-2xl mb-4">Sign Up</h1>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-                <div className="mb-4">
-                    <label htmlFor="name">Name</label>
-                    <input
-                        type="text"
-                        id="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="email">Email</label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit">
-                    Sign Up
-                </button>
-            </form>
-        </div>
+        <Box
+            sx={{
+                minHeight: '100vh',
+                bgcolor: 'grey.100',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}
+        >
+            <Container maxWidth="xs">
+                <Paper
+                    elevation={3}
+                    sx={{
+                        p: 4,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                        borderRadius: 2,
+                    }}
+                >
+                    <Typography
+                        variant="h5"
+                        component="h1"
+                        align="center"
+                        color="text.primary"
+                        gutterBottom
+                    >
+                        Sign Up
+                    </Typography>
+                    {error && (
+                        <Typography
+                            variant="body2"
+                            color="error"
+                            align="center"
+                            sx={{ mb: 2 }}
+                        >
+                            {error}
+                        </Typography>
+                    )}
+                    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <TextField
+                            id="name"
+                            label="Name"
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                            fullWidth
+                            variant="outlined"
+                            autoComplete="name"
+                        />
+                        <TextField
+                            id="email"
+                            label="Email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            fullWidth
+                            variant="outlined"
+                            autoComplete="email"
+                        />
+                        <TextField
+                            id="password"
+                            label="Password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            fullWidth
+                            variant="outlined"
+                            autoComplete="new-password"
+                        />
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            sx={{ py: 1.5 }}
+                        >
+                            Sign Up
+                        </Button>
+                    </Box>
+                    <Typography variant="body2" align="center" color="text.secondary" sx={{ mt: 2 }}>
+                        Already have an account?{' '}
+                        <NextLink href="/signIn" passHref>
+                            <MuiLink underline="hover" color="primary">
+                                Sign In
+                            </MuiLink>
+                        </NextLink>
+                    </Typography>
+                </Paper>
+            </Container>
+        </Box>
     );
 }
