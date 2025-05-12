@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 export default function Header() {
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -30,6 +30,7 @@ export default function Header() {
                 color="inherit"
                 component={Link}
                 href={link.href}
+                onClick={link.name === 'Logout' ? () => signOut() : () => { }}
                 sx={{ mx: 1, textTransform: 'none' }}
               >
                 {link.name}
