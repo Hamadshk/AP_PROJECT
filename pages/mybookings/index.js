@@ -1,10 +1,26 @@
 import React from 'react';
 import { getSession } from 'next-auth/react';
-import { Container, Typography, List, ListItem, Paper, Box } from '@mui/material';
+import { Container, Typography, List, ListItem, Paper, Box, Button } from '@mui/material';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
 const Mybookings = ({ bookings }) => {
+  async function handleDeleteBooking(bookingId) {
+    let res = await fetch(`http://localhost:3000/api/mybookings?bookingId=${bookingId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert('Booking deleted successfully');
+      window.location.reload();
+    } else {
+      alert('Failed to delete booking');
+    }
+
+  }
   return (
     <Box
       sx={{
@@ -51,6 +67,8 @@ const Mybookings = ({ bookings }) => {
                         Slot: {booking.slot}
                       </Typography>
                     </Box>
+                    <Button variant='contained' onClick={() => handleDeleteBooking(booking._id)}>Delete</Button>
+
                   </Paper>
                 </ListItem>
               ))}
@@ -70,7 +88,7 @@ export async function getServerSideProps(context) {
   if (!session) {
     return {
       redirect: {
-        destination: '/login',
+        destination: '/signIn',
         permanent: false,
       },
     };

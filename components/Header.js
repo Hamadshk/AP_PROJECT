@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
-
+import { useSession } from 'next-auth/react';
 export default function Header() {
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -12,7 +12,7 @@ export default function Header() {
     { name: 'Logout', href: '/signIn' },
     { name: 'Dashboard', href: '/admin/dashboard' },
   ];
-
+  const { data: session } = useSession();
   return (
     <AppBar
       position="static"
@@ -37,6 +37,8 @@ export default function Header() {
             ))}
           </nav>
         </Toolbar>
+        <div style={{ padding: '5px' }}>{session?.user.email}</div>
+
       </Container>
     </AppBar>
   );
