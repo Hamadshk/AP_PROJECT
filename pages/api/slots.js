@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI; // Store in .env.local
+const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
 const allSlots = [
@@ -15,30 +15,24 @@ const allSlots = [
 ];
 
 export default async function handler(req, res) {
-  if (req.method === 'GET') {
-    try {
-      await client.connect();
-      const database = client.db('moviehouse');
-      const bookings = database.collection('bookings');
-
-      const { date } = req.query;
-      const bookedSlots = await bookings
-        .find({ date })
-        .project({ slot: 1, _id: 0 })
-        .toArray();
-      const bookedSlotNames = bookedSlots.map((booking) => booking.slot);
-
-      const availableSlots = allSlots.filter((slot) => !bookedSlotNames.includes(slot));
-
-      res.status(200).json(availableSlots);
-    } catch (error) {
-      console.error('Error fetching slots:', error);
-      res.status(500).json({ error: 'Failed to fetch slots' });
-    } finally {
-      await client.close();
-    }
-  } else {
+  if (req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
+
+  await client.connect();
+  const database = client.db('moviehouse');
+  const bookings = database.collection('bookings');
+
+  const { date } = req.query;
+  const bookedSlots = await bookings
+    .find({ date })
+    .project({ slot: 1, _id: 0 })
+    .toArray();
+  const bookedSlotNames = bookedSlots.map((booking) => booking.slot);
+
+  const availableSlots = allSlots.filter((slot) => !bookedSlotNames.includes(slot));
+
+  await client.close();
+  res.status(200).json(availableSlots);
 }

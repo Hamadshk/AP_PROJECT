@@ -177,39 +177,28 @@ export default function BookingPage() {
       alert('Please select a time slot');
       return;
     }
-
+  
     setLoading(true);
-    setError(null);
-    try {
-      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          date: formattedDate,
-          slot: selectedSlot,
-          userId: session.user.id
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to save booking');
-      }
-
-      const data = await response.json();
-      alert(`Booking confirmed for ${format(selectedDate, 'PP')} at ${selectedSlot}`);
-      setSelectedSlot(null);
-      // Refresh slots
-      const slotsResponse = await fetch(`/api/slots?date=${formattedDate}`);
-      const slots = await slotsResponse.json();
-      setAvailableSlots(slots);
-    } catch (err) {
-      setError(err.message);
-      alert(`Error: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+    const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+    const response = await fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        date: formattedDate,
+        slot: selectedSlot,
+        userId: session.user.id,
+      }),
+    });
+  
+    const data = await response.json();
+    alert(`Booking confirmed for ${format(selectedDate, 'PP')} at ${selectedSlot}`);
+    setSelectedSlot(null);
+  
+    const slotsResponse = await fetch(`/api/slots?date=${formattedDate}`);
+    const slots = await slotsResponse.json();
+    setAvailableSlots(slots);
+  
+    setLoading(false);
   };
 
   return (
