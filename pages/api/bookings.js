@@ -4,36 +4,27 @@ const uri = process.env.MONGODB_URI; // Store in .env.local
 const client = new MongoClient(uri);
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    try {
-      const { date, slot, userId } = req.body; 
+  if (req.method === 'GET') {
 
-      await client.connect();
-      const database = client.db('moviehouse');
-      const bookings = database.collection('bookings');
-
-      const existingBooking = await bookings.findOne({ date, slot });
-      if (existingBooking) {
-        return res.status(400).json({ error: 'Slot already booked' });
-      }
-
-      const booking = {
-        date,
-        slot,
-        userId: userId || 'anonymous',
-        createdAt: new Date(),
-      };
-      await bookings.insertOne(booking);
-
-      res.status(201).json({ message: 'Booking confirmed', booking });
-    } catch (error) {
-      console.error('Error saving booking:', error);
-      res.status(500).json({ error: 'Failed to save booking' });
-    } finally {
-      await client.close();
-    }
-  } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+  const session = await getSession({ req });
+  if (!session) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
+
+  const userId = session.user.id; // Get user ID from session
+
+
+  const client = await MongoClient.connect(process.env.MONGODB_URI);
+  const db = client.db('moviehouse'); // Replace with your database name
+  const bookings = await db.collection('bookings').find({ userId }).toArray();
+  client.close();
+
+  // Serialize bookings to convert ObjectId to string
+  const serializedBookings = bookings.map((booking) => ({
+    ...booking,
+    _id: booking._id.toString(),
+  }));
+
+  res.status(200).json(serializedBookings);
+}
 }
