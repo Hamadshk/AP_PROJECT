@@ -10,14 +10,14 @@ const Mybookings = ({ bookings }) => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100vh', // Ensure the container takes at least the full viewport height
+        minHeight: '100vh', 
       }}
     >
       <Header />
       <Box
         component="main"
         sx={{
-          flex: 1, // Allow main content to grow and push footer down
+          flex: 1,
           py: 4,
         }}
       >

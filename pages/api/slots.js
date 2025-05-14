@@ -15,10 +15,7 @@ const allSlots = [
 ];
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', ['GET']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
+  if (req.method === 'GET') {
 
   await client.connect();
   const database = client.db('moviehouse');
@@ -35,4 +32,4 @@ export default async function handler(req, res) {
 
   await client.close();
   res.status(200).json(availableSlots);
-}
+}}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Button, Grid, Container, CircularProgress } from '@mui/material';
+import { Box, Card, CardContent, Typography, Button, Grid, Container, CircularProgress, TextField } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -8,10 +8,8 @@ import { format } from 'date-fns';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { useSession, getSession } from "next-auth/react";
-// Import futuristic font
 import '@fontsource/orbitron/700.css';
 
-// Styled component for the background with image and gradient
 const Background = styled(Box)(({ theme }) => ({
   position: 'absolute',
   top: 0,
@@ -34,7 +32,6 @@ const Background = styled(Box)(({ theme }) => ({
       transform: 'scale(1.05)',
     },
   },
-  // Subtle overlay for depth
   '&:before': {
     content: '""',
     position: 'absolute',
@@ -47,7 +44,6 @@ const Background = styled(Box)(({ theme }) => ({
   },
 }));
 
-// Styled component for the main content area
 const ContentWrapper = styled(Box)(({ theme }) => ({
   position: 'relative',
   minHeight: 'calc(100vh - 64px - 120px)',
@@ -60,7 +56,6 @@ const ContentWrapper = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
 }));
 
-// Styled component for the booking card with glassmorphism
 const BookingCard = styled(Card)(({ theme }) => ({
   position: 'relative',
   zIndex: 1,
@@ -79,7 +74,6 @@ const BookingCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-// Styled component for futuristic typography
 const FuturisticTypography = styled(Typography)(({ theme }) => ({
   fontFamily: '"Orbitron", sans-serif',
   color: '#fff',
@@ -87,7 +81,6 @@ const FuturisticTypography = styled(Typography)(({ theme }) => ({
   letterSpacing: '1.5px',
 }));
 
-// Styled component for slot buttons
 const SlotButton = styled(Button)(({ theme, selected }) => ({
   fontFamily: '"Orbitron", sans-serif',
   background: selected
@@ -107,7 +100,7 @@ const SlotButton = styled(Button)(({ theme, selected }) => ({
     boxShadow: '0 0 16px rgba(0, 229, 255, 1)',
     transform: 'scale(1.05)',
   },
-  '&:disabled': {
+  '&manage': {
     background: 'rgba(255, 255, 255, 0.2)',
     color: 'rgba(255, 255, 255, 0.5)',
     boxShadow: 'none',
@@ -127,27 +120,28 @@ const ConfirmButton = styled(Button)(({ theme }) => ({
     boxShadow: '0 0 20px rgba(255, 64, 129, 1)',
     transform: 'scale(1.1)',
   },
-  '&:disabled': {
+  '&:manage': {
     background: 'rgba(255, 255, 255, 0.2)',
     color: 'rgba(255, 255, 255, 0.5)',
     boxShadow: 'none',
   },
 }));
 
-export default function BookingPage() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+export default function BookingPage({ initialSlots, initialDate, initialError }) {
+  const [selectedDate, setSelectedDate] = useState(new Date(initialDate));
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [availableSlots, setAvailableSlots] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState(initialSlots);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(initialError);
   const { data: session } = useSession();
 
   useEffect(() => {
     async function fetchSlots() {
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+      if (formattedDate === initialDate && initialSlots.length > 0) return; // Skip if initial data is valid
       setLoading(true);
       setError(null);
       try {
-        const formattedDate = format(selectedDate, 'yyyy-MM-dd');
         const response = await fetch(`/api/slots?date=${formattedDate}`);
         if (!response.ok) {
           throw new Error('Failed to fetch slots');
@@ -156,12 +150,11 @@ export default function BookingPage() {
         setAvailableSlots(slots);
       } catch (err) {
         setError(err.message);
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     }
     fetchSlots();
-  }, [selectedDate]);
+  }, [selectedDate, initialDate, initialSlots]);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -180,24 +173,32 @@ export default function BookingPage() {
   
     setLoading(true);
     const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-    const response = await fetch('/api/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        date: formattedDate,
-        slot: selectedSlot,
-        userId: session.user.id,
-      }),
-    });
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: formattedDate,
+          slot: selectedSlot,
+          userId: session.user.id,
+        }),
+      });
   
-    const data = await response.json();
-    alert(`Booking confirmed for ${format(selectedDate, 'PP')} at ${selectedSlot}`);
-    setSelectedSlot(null);
+      if (!response.ok) {
+        throw new Error('Failed to book slot');
+      }
   
-    const slotsResponse = await fetch(`/api/slots?date=${formattedDate}`);
-    const slots = await slotsResponse.json();
-    setAvailableSlots(slots);
+      const data = await response.json();
+      alert(`Booking confirmed for ${format(selectedDate, 'PP')} at ${selectedSlot}`);
+      setSelectedSlot(null);
   
+      // Refresh slots after booking
+      const slotsResponse = await fetch(`/api/slots?date=${formattedDate}`);
+      const slots = await slotsResponse.json();
+      setAvailableSlots(slots);
+    } catch (err) {
+      setError(err.message);
+    }
     setLoading(false);
   };
 
@@ -296,7 +297,6 @@ export default function BookingPage() {
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
-  console.log(session);
   if (!session) {
     return {
       redirect: {
@@ -305,5 +305,28 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  return { props: {} };
+
+  // Default to today's date or use query param
+  const initialDate = context.query.date || format(new Date(), 'yyyy-MM-dd');
+  let initialSlots = [];
+  let initialError = null;
+
+  try {
+    // Fetch slots on the server
+    const response = await fetch(`http://localhost:3000/api/slots?date=${initialDate}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch slots');
+    }
+    initialSlots = await response.json();
+  } catch (err) {
+    initialError = err.message;
+  }
+
+  return {
+    props: {
+      initialSlots,
+      initialDate,
+      initialError,
+    },
+  };
 }
